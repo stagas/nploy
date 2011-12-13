@@ -9,7 +9,7 @@
   "engines": {
     "node": "~0.6.0"
   },
-  "bin" : {
+  "bin": {
     "nploy": "./bin/nploy.js"
   },
   "dependencies": {
