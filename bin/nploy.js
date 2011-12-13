@@ -128,7 +128,7 @@ function runChild (app, callback) {
   })
 
   child.stderr.on('data', function (data) {
-    process.stdout.write(data)
+    process.stderr.write(data)
   })
 
   child.on('exit', function (err, sig) {
