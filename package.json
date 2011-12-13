@@ -1,0 +1,19 @@
+{
+  "author": "George Stagas <gstagas@gmail.com> (http://stagas.com)",
+  "name": "nploy",
+  "description": "Lazy spawn node apps on single ip",
+  "version": "0.1.0",
+  "repository": {
+    "url": ""
+  },
+  "engines": {
+    "node": "~0.6.0"
+  },
+  "bin" : {
+    "nploy": "./bin/nploy.js"
+  },
+  "dependencies": {
+    "http-proxy": "~0.7.0"
+  },
+  "devDependencies": {}
+}
