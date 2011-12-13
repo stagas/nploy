@@ -1,13 +1,32 @@
 #!/usr/bin/env node
 
-// config
-var startPort = 7000
-var endPort = 7002
-var port = startPort
-var timeToIdle = 1000 * 5
+var program = require('commander')
+function range (val) {
+  return val.split('..').map(function (el) {
+    return parseInt(el, 10)
+  })
+}
 
-var proxyPort = +process.argv[2] || 80
-var proxyHost = process.argv[3] || '0.0.0.0'
+program
+  .version('0.1.2')
+  .option('-r, --range <a>..<b>', 'Port range [7000..7099]', range)
+  .option('-t, --time <seconds>', 'Time to idle [15]', 15, parseInt)
+  .option('-p, --port <port>', 'Port to listen to [80]', 80, parseInt)
+  .option('-H, --host <host>', 'Host to listen to [0.0.0.0]', '0.0.0.0')
+  .option('-c, --config <config>', 'Config file [./nploy.cfg]', './nploy.cfg')
+  .option('-d, --dir <dir>', 'Current working dir [.]', '.')
+  .parse(process.argv)
+
+if (program.dir) process.chdir(program.dir)
+
+var startPort = program.range && program.range[0] || 7000
+var endPort = program.range && program.range[1] || 7099
+var port = startPort
+var timeToIdle = 1000 * program.time
+var config = program.config
+
+var proxyPort = program.port
+var proxyHost = program.host
 
 // modules
 var fs = require('fs')
@@ -25,14 +44,24 @@ var pids = []
 console.log('-----------')
 console.log('-- nploy --')
 console.log('-----------')
+console.log('config:', config)
+console.log('range:', startPort, '-', endPort)
+console.log('time to idle:', (timeToIdle / 1000) + 's')
 
 var routes = (function () {
-  console.log('routes:\n')
+  console.log('routes:')
   var routes = {}
-  var cfg = fs.readFileSync('./nploy.cfg', 'utf8')
+  try {
+    var cfg = fs.readFileSync(config, 'utf8')
+  } catch (err) {
+    if (err) {
+      console.log('config file not found. --help for help')
+      return process.exit()
+    }
+  }
   cfg.split(/\r\n|\r|\n/gim).forEach(function (line) {
-    console.log(line)
     if (!line.trim().length) return
+    console.log('  ' + line)
     var hostname = line.split(' ')[0]
     var target = line.split(' ')[1]
     var www = hostname.substr(0, 4) === 'www.'
@@ -132,13 +161,13 @@ function runChild (app, callback) {
   })
 
   child.on('exit', function (err, sig) {
+    log(app, 'exited')
     pids.splice(pids.indexOf(app.pid), 1)
     ports.splice(ports.indexOf(app.port), 1)
     app.port = 0
     app.pid = null
     app.lastAccessTime = 0
     app.child = null
-    log(app, 'exited')
   })
   
   // give it some time to initialize
@@ -174,11 +203,11 @@ function idler () {
             }
             pids.splice(pids.indexOf(app.pid), 1)
             ports.splice(ports.indexOf(app.port), 1)
+            log(app, 'idled')
             app.port = 0
             app.pid = null
             app.lastAccessTime = 0
             app.child = null
-            log(app, 'idled')
             if (waitFor) {
               --waitFor || done()
             }
