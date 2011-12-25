@@ -36,6 +36,38 @@ If the domain is prefixed with `www.` it will use it and redirect
 requests there. So going to `domain.other.com/foo/bar` you will be redirected to
 `www.domain.other.com/foo/bar`. And vice-versa.
 
+
+## Use as a library
+
+```js
+var nploy = require('nploy');
+nploy.start({
+    range: [ 7000, 7099 ],
+    time: 15,
+    port: 80,
+    host: "0.0.0.0",
+    config: "./nploy.cfg",
+    dir: "."
+});
+```
+
+This will start nploy on port 80.
+
+## Testing
+
+Add __a.localhost__ and __b.localhost__ to ```/etc/hosts```:
+
+```hosts
+127.0.0.1 a.localhost
+127.0.0.1 b.localhost
+```
+
+Run tests:
+
+```bash
+npm test
+```
+
 ## Licence
 
 MIT/X11
