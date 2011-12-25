@@ -6,6 +6,8 @@ var exec = cp.exec
 var spawn = cp.spawn
 var child
 
+var PORT = 5000;
+
 function assertResponse (url, data, callback) {
   request.get(url, function (err, res, body) {
     if (err) return callback(err)
@@ -31,7 +33,7 @@ function kill (pids, callback) {
 test("start nploy", function (t) {
   t.plan(1)
   var cwd = process.cwd()
-  child = spawn('node', ['../bin/nploy'], {
+  child = spawn('node', ['../bin/nploy', '-p', PORT], {
     cwd: ~cwd.indexOf('test') ? '.' : './test'
   })
   child.stdout.setEncoding('utf8')
@@ -49,10 +51,10 @@ test("start nploy", function (t) {
 
 test("make requests", function (t) {
   t.plan(2)
-  assertResponse('http://a.localhost', 'A: Hello', function (err, body) {
+  assertResponse('http://a.localhost:' + PORT, 'A: Hello', function (err, body) {
     t.equal(err, null, "got response from A")
   })
-  assertResponse('http://b.localhost', 'B: Hello', function (err, body) {
+  assertResponse('http://b.localhost:' + PORT, 'B: Hello', function (err, body) {
     t.equal(err, null, "got response from B")
   })
 })
