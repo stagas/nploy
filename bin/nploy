@@ -15,7 +15,24 @@ program
   .option('-H, --host <host>', 'Host to listen to [0.0.0.0]', '0.0.0.0')
   .option('-c, --config <config>', 'Config file [./nploy.cfg]', './nploy.cfg')
   .option('-d, --dir <dir>', 'Current working dir [.]', '.')
+  .option('-v, --verbose', 'Show some debugging information', false)
   .parse(process.argv)
 
+
 var nploy = require('../lib/nploy');
-nploy.start(program);
+
+if (program.verbose) {
+  program.debug = true
+  program.output = 'console'
+}
+
+var server = nploy.start(program, function() {
+  console.log('listening on http://' + server.endpoint.host + ':' + server.endpoint.port + '/')
+});
+
+console.log('-----------')
+console.log('-- nploy --')
+console.log('-----------')
+console.log('config:', server.config)
+console.log('range:', server.router.range)
+console.log('time to idle:', (server.router.idletime) + 's')
